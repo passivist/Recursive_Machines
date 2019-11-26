@@ -239,15 +239,13 @@
 };
 
 // take the first few notes of sequenceA and construct a new sequence where sequenceA is
-// transposed accordings to the notes in sequenceB. If a rythm is supplied then the function
-// chooses how many notes from sequenceA to take depending on the rythm. On short notes take less notes
-// at a minimum of two,  at long notes take more
+// transposed accordings to the notes in sequenceB. If a rythm is supplied have the resulting
+// sequence imitate that rythm
 ~sequence = {|sequenceA, sequenceB, amount=1, quantize=false, scale|
-	var newSequence, noteLength, copyLength;
+	var newSequence, copyLength;
 	newSequence = [[], []];
 	sequenceB[0].size.do{|i|
-		noteLength = (sequenceB[1][i] * amount).clip(0.125, 4);
-		copyLength = noteLength.linlin(0.125, 4, 2, sequenceA[0].size).asInt;
+		copyLength = amount.linlin(0, 1, 2, sequenceA[1].size).round.asInt;
 		copyLength.do{|j|
 			var note;
 			note = sequenceB[0][i] + sequenceA[0][j];
