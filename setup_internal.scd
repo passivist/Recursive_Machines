@@ -37,25 +37,21 @@ SynthDef(\s1, {|out, freq, pan=0, amp=0.1|
 ~scale = Scale.at(\dorian);
 Tdef(\seqA, {
 	inf.do{|i|
-		if((~seqA[0][i % ~seqA[0].size] == \rest).not){
-			Synth(\s0, [
-				\freq, (~seqA[0][i % ~seqA[0].size] + (12 * 5) + 2.7).midicps,
-				\pan, -0.5,
-			]);
-		};
+		Synth(\s0, [
+			\freq, (~seqA[0][i % ~seqA[0].size] + (12 * 5) + 2.7).midicps,
+			\pan, -0.5,
+		]);
 		(~seqA[1][i % ~seqA[1].size] / 2).wait;
 	};
 });
 
 Tdef(\seqB, {
 	inf.do{|i|
-		if((~seqB[0][i % ~seqB[0].size] == \rest).not){
-			Synth(\s1, [
-				\freq, (~seqB[0][i % ~seqB[0].size] + (12 * 5) + 2.7).midicps,
-				\pan, 0.5
+		Synth(\s1, [
+			\freq, (~seqB[0][i % ~seqB[0].size] + (12 * 5) + 2.7).midicps,
+			\pan, 0.5
 
-			]);
-		};
+		]);
 		(~seqB[1][i % ~seqB[1].size] / 2).wait;
 	};
 });

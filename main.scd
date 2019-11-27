@@ -16,6 +16,8 @@ s.waitForBoot{
 };
 )
 
+
+
 Tdef(\seqA).play;
 Tdef(\seqB).play;
 
