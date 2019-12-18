@@ -10,11 +10,12 @@
 	lastPitch = sequence[0].last;
 	// calculate the weights on the basis of all the pitches in the scale
 	weightsPitch = (scale-lastPitch).abs;
-	weightsPitch = weightsPitch.collect{|item| if(item == 0){ 3 }{ item }};
-	// das ist seltsam!
-	weightsPitch = (weightsPitch.maxItem - weightsPitch).normalizeSum;
+	weightsPitch = weightsPitch.collect{|item| if(item == 0){ 5 }{ item }};
+	// flip the values
+	weightsPitch = (weightsPitch.maxItem - weightsPitch).normalize.linexp(0, 1, 0.001, 1);
 	// choose a new pitch to add
-	newPitch = wchoose(scale, weightsPitch);
+	newPitch = wchoose(scale, weightsPitch.normalizeSum);
+	//postf("lastPitch: % newPitch: %\nscale:  %\nweight: %\n", lastPitch, newPitch, scale, weightsPitch);
 	sequence[0] = sequence[0].add(newPitch);
 	sequence[1] = sequence[1].add(1);
 	sequence;
@@ -31,15 +32,16 @@
 	scale = (scale - 12) ++ scale;
 	newSequence[0] = sequence[0].collect{|item, i|
 		if(amount.coin){
-			// get the last note in the pitch array
+			// get the previous note in the pitch array
 			prevPitch = sequence[0][(i - 1).wrap(0, (sequence[0].size - 1))];
 			prevPitch;
-			// calculate the weights on the basis of all the pitches in the scale
 			weightsPitch = (scale-prevPitch).abs;
-			weightsPitch = weightsPitch.collect{|item| if(item == 0){ 3 }{ item }};
-			weightsPitch = (weightsPitch.maxItem - weightsPitch).normalizeSum;
+			weightsPitch = weightsPitch.collect{|item| if(item == 0){ 5 }{ item }};
+			// flip and scale the values
+			weightsPitch = (weightsPitch.maxItem - weightsPitch).normalize.linexp(0, 1, 0.001, 1);
 			// choose a new pitch to add
-			newPitch = wchoose(scale, weightsPitch)
+			newPitch = wchoose(scale, weightsPitch.normalizeSum);
+			postf("lastPitch: % newPitch: %\nscale:  %\nweight: %\n", prevPitch, newPitch, scale, weightsPitch);
 		}{
 			item
 		}
@@ -50,7 +52,7 @@
 ~shorten = {|sequence, amount=0.1|
 	var length;
 	amount = amount.clip(0.001, 1);
-	length = (sequence[0].size / (1/amount)).ceil.postln;
+	length = (sequence[0].size / (1/amount)).ceil;
 	length.do{
 		if(sequence[0].size > 1){
 			sequence.do{|item, i| item.removeAt(sequence[i].size - 1); }
@@ -245,7 +247,7 @@
 	var newSequence, copyLength;
 	newSequence = [[], []];
 	sequenceB[0].size.do{|i|
-		copyLength = amount.linlin(0, 1, 2, sequenceA[1].size).round.asInt;
+		copyLength = amount.linlin(0, 1, 2, sequenceA[0].size).round.asInt;
 		copyLength.do{|j|
 			var note;
 			note = sequenceB[0][i] + sequenceA[0][j];

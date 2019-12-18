@@ -32,13 +32,29 @@ SynthDef(\s1, {|out, freq, pan=0, amp=0.1|
 	Out.ar(out, sig.tanh * amp);
 }).add;
 
+~scale = Scale.at(\dorian);
+
 ~seqA = [[0], [1]];
 ~seqB = [[0], [1]];
-~scale = Scale.at(\dorian);
+
+// die Sequenzen sollen jedes mal wenn sie einen neuen Ton spielen diese Funktion
+// aufrufen diese soll dann anhand des musikalischen Materials die Sequenzen verändern
+~recursionA = {|seq, pos|
+	// hier wird dann eine funktion aufgerufen um eine bestimmte Sequenz zu verändern
+
+};
+
+~recursionB = {|seq, pos|
+
+};
+
 Tdef(\seqA, {
+	var pos = 0;
 	inf.do{|i|
+		pos = i % ~seqA[0].size;
+		~recursionA.(~seqA, pos);
 		Synth(\s0, [
-			\freq, (~seqA[0][i % ~seqA[0].size] + (12 * 5) + 2.7).midicps,
+			\freq, (~seqA[0][pos] + (12 * 5) + 2.7).midicps,
 			\pan, -0.5,
 		]);
 		(~seqA[1][i % ~seqA[1].size] / 2).wait;
@@ -46,9 +62,12 @@ Tdef(\seqA, {
 });
 
 Tdef(\seqB, {
+	var pos = 0;
 	inf.do{|i|
+		pos = i % ~seqB[0].size;
+		~recursionB.(~seqB, pos);
 		Synth(\s1, [
-			\freq, (~seqB[0][i % ~seqB[0].size] + (12 * 5) + 2.7).midicps,
+			\freq, (~seqB[0][pos] + (12 * 5) + 2.7).midicps,
 			\pan, 0.5
 
 		]);
