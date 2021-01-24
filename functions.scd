@@ -153,7 +153,7 @@
 		newSequence[i] = amount.linlin(0, 1, sequenceA[i], sequenceB[i]);
 	};
 	// round the pitch values
-	newSequence[0] = newSequence[0].collect{|item, i| item.round(1).asInt };
+	newSequence[0] = newSequence[0].collect{|item, i| item.round(1).asInteger };
 	if(quantizeLength){ newSequence = ~quantizeLength.(newSequence) };
 	if(quantize){ ~quantize.(newSequence, scale) }{ newSequence };
 };
@@ -194,7 +194,7 @@
 	intervalsA.removeAt(0);
 	intervalsB.removeAt(0);
 	// crossfade between the intervals
-	intervals = ~fadeFlat.(intervalsA, intervalsB, amount, 1).asInt;
+	intervals = ~fadeFlat.(intervalsA, intervalsB, amount, 1).asInteger;
 	// construct the new sequence from the faded intervals
 	newSequence[0] = sequenceA[0].size.collect{|i|
 		if(i==0){
@@ -226,7 +226,7 @@
 		try = sequenceA[0][i];
 		amount.do{|j|
 			if(j == 0){ oldTryCon = 0 }{ oldTryCon = tryCon };
-			j = (j - ((amount/2).floor)).asInt;
+			j = (j - ((amount/2).floor)).asInteger;
 			tryCon = consonance[(sequenceB[0][i] - try).wrap(0, 11)];
 			if(tryCon > oldTryCon) { try = sequenceA[0][i] + j};
 			// postf("oldNote: %, try: %, oldCon: %, tryCon: %, interval: %\n", sequenceA[i], try, oldCon, tryCon, (sequenceB[i] - item).wrap(0, 11));
@@ -245,7 +245,7 @@
 	var newSequence, copyLength;
 	newSequence = [[], []];
 	sequenceB[0].size.do{|i|
-		copyLength = amount.linlin(0, 1, 2, sequenceA[1].size).round.asInt;
+		copyLength = amount.linlin(0, 1, 2, sequenceA[1].size).round.asInteger;
 		copyLength.do{|j|
 			var note;
 			note = sequenceB[0][i] + sequenceA[0][j];
