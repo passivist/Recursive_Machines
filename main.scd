@@ -14,7 +14,7 @@ s.waitForBoot{
 Tdef(\seqA).play;
 Tdef(\seqB).play;
 
-~seqA
+~seqA = ~lengthen.(~seqA)
 
 ~scale = Scale.new([0, 2, 3, 5, 6, 8, 9, 11], 12, Tuning.et12, \halfwhole);
 
