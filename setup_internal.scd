@@ -34,7 +34,9 @@ SynthDef(\s1, {|out, freq, pan=0, amp=0.1|
 
 ~seqA = [[0], [1]];
 ~seqB = [[0], [1]];
+
 ~scale = Scale.at(\dorian);
+
 Tdef(\seqA, {
 	inf.do{|i|
 		if((~seqA[0][i % ~seqA[0].size] == \rest).not){
@@ -59,8 +61,3 @@ Tdef(\seqB, {
 		(~seqB[1][i % ~seqB[1].size] / 2).wait;
 	};
 });
-
-3.do{
-	~seqA = ~lengthen.(~seqA, ~scale);
-	~seqB = ~lengthen.(~seqB, ~scale);
-};
