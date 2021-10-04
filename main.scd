@@ -8,7 +8,6 @@ s.waitForBoot{
 	//"stretcher.scd".loadRelative;
 	"setup_internal.scd".loadRelative;
 	//"setup_modular.scd".loadRelative;
-
 };
 )
 

@@ -1,7 +1,7 @@
 // expects the sequence to be operated on and a scale object
 ~lengthen = {|sequence, scale|
 	var weightsPitch, lastPitch, newPitch;
-	scale ?? {"no valid scale provided!".error };
+	scale !? {|scale|
 	// create an array of all the degrees in the scale and extend it
 	// one octave down
 	scale = scale.degrees;
@@ -18,6 +18,7 @@
 	sequence[0] = sequence[0].add(newPitch);
 	sequence[1] = sequence[1].add(1);
 	sequence;
+} ?? { "scale is nil, pass valid scale object as argument".error };
 };
 
 // change some amount of pitches in the sequence
