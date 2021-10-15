@@ -1,50 +1,63 @@
 // expects the sequence to be operated on and a scale object
 ~lengthen = {|sequence, scale|
 	var weightsPitch, lastPitch, newPitch;
-	scale !? {|scale|
-	// create an array of all the degrees in the scale and extend it
-	// one octave down
-	scale = scale.degrees;
-	scale = (scale - 12) ++ scale;
-	// get the last note in the pitch array
-	lastPitch = sequence[0].last;
-	// calculate the weights on the basis of all the pitches in the scale
-	weightsPitch = (scale-lastPitch).abs;
-	weightsPitch = weightsPitch.collect{|item| if(item == 0){ 3 }{ item }};
-	// das ist seltsam!
-	weightsPitch = (weightsPitch.maxItem - weightsPitch).normalizeSum;
-	// choose a new pitch to add
-	newPitch = wchoose(scale, weightsPitch);
-	sequence[0] = sequence[0].add(newPitch);
-	sequence[1] = sequence[1].add(1);
-	sequence;
-} ?? { "scale is nil, pass valid scale object as argument".error };
+	if(scale.notNil){
+		// if we have a valid scale object we can safely modify the sequence
+		// create an array of all the degrees in the scale and extend it
+		// one octave down
+		scale = scale.degrees;
+		scale = (scale - 12) ++ scale;
+		// get the last note in the pitch array
+		lastPitch = sequence[0].last;
+		// calculate the weights on the basis of all the pitches in the scale
+		weightsPitch = (scale-lastPitch).abs;
+		weightsPitch = weightsPitch.collect{|item| if(item == 0){ 3 }{ item }};
+		// das ist seltsam!
+		weightsPitch = (weightsPitch.maxItem - weightsPitch).normalizeSum;
+		// choose a new pitch to add
+		newPitch = wchoose(scale, weightsPitch);
+		sequence[0] = sequence[0].add(newPitch);
+		sequence[1] = sequence[1].add(1);
+	}{
+		// if we don't have a valid scale object we don't modify the sequence
+		// instead we throw an error
+		"scale is nil, pass valid scale object as argument\narguments: sequence, scale".error;
+	};
+	// the sequence gets returned either way so we don't disrupt playback
+	sequence
 };
 
 // change some amount of pitches in the sequence
 ~mutate = {|sequence, amount=0.1, scale|
 	var weightsPitch, prevPitch, newPitch, newSequence;
-	newSequence = [[], sequence[1]];
-	scale ?? {"no valid scale provided!".error; };
-	// create an array of all the degrees in the scale and extend it
-	// one octave down
-	scale = scale.degrees;
-	scale = (scale - 12) ++ scale;
-	newSequence[0] = sequence[0].collect{|item, i|
-		if(amount.coin){
-			// get the last note in the pitch array
-			prevPitch = sequence[0][(i - 1).wrap(0, (sequence[0].size - 1))];
-			prevPitch;
-			// calculate the weights on the basis of all the pitches in the scale
-			weightsPitch = (scale-prevPitch).abs;
-			weightsPitch = weightsPitch.collect{|item| if(item == 0){ 3 }{ item }};
-			weightsPitch = (weightsPitch.maxItem - weightsPitch).normalizeSum;
-			// choose a new pitch to add
-			newPitch = wchoose(scale, weightsPitch)
-		}{
-			item
-		}
+	if(scale.notNil){
+		// if we have a valid scale object we can safely modify the sequence
+		newSequence = [[], sequence[1]];
+		// create an array of all the degrees in the scale and extend it
+		// one octave down
+		scale = scale.degrees;
+		scale = (scale - 12) ++ scale;
+		newSequence[0] = sequence[0].collect{|item, i|
+			if(amount.coin){
+				// get the last note in the pitch array
+				prevPitch = sequence[0][(i - 1).wrap(0, (sequence[0].size - 1))];
+				prevPitch;
+				// calculate the weights on the basis of all the pitches in the scale
+				weightsPitch = (scale-prevPitch).abs;
+				weightsPitch = weightsPitch.collect{|item| if(item == 0){ 3 }{ item }};
+				weightsPitch = (weightsPitch.maxItem - weightsPitch).normalizeSum;
+				// choose a new pitch to add
+				newPitch = wchoose(scale, weightsPitch)
+			}{
+				item
+			}
+		};
+		sequence = newSequence;
+	}{
+		"scale is nil, pass valid scale object as argument\narguments: sequence, amount, scale".error;
 	};
+	// the sequence gets returned either way so we don't disrupt playback
+	sequence
 };
 
 // expects the sequence and an amount between 0.001 and 1
@@ -62,19 +75,37 @@
 
 // expects  the sequence and a valid scale object
 ~quantize = {|sequence, scale|
-	scale !? (
+	if(scale.notNil){
 		sequence[0] = sequence[0].collect{|item, i|
 			item.nearestInScale(scale, 12);
 		};
-		sequence;
-	) ?? "scale is nil, pass valid scale object as argument";
+	}{
+		// if we don't have a valid scale object we don't modify the sequence
+		// instead we throw an error
+		"scale is nil, pass valid scale object as argument\narguments: sequence, scale".error;
+	};
+	// the sequence gets returned either way so we don't disrupt playback
+	sequence;
 };
 
 // expects the sequence, an amount of positive or negative integers,
 // a bool for the quantize flag and a valid scale object
 ~transpose = { |sequence, amount=0, quantize=false, scale|
-	sequence[0] = sequence[0] + amount;
-	if(quantize){ ~quantize.(sequence, scale) }{ sequence };
+	if(quantize){
+		if(scale.notNil){
+			sequence[0] = sequence[0] + amount;
+			if(quantize){ ~quantize.(sequence, scale) }{ sequence };
+		}{
+			// if we don't have a valid scale object we don't modify the sequence
+			// instead we throw an error
+			"scale is nil, pass valid scale object as argument\narguments: sequence, amount, quantize, scale".error;
+		}
+	}{
+		// since we don't want to quantize we don't have to check for a valid scale
+		sequence[0] = sequence[0] + amount;
+	};
+	// the sequence gets returned either way so we don't disrupt playback
+	sequence
 };
 
 // invert all the intervals in a sequence
@@ -94,7 +125,19 @@
 			lastItem = lastItem + interval[i];
 		};
 	};
-	if(quantize){ ~quantize.(newSequence, scale) }{ newSequence };
+	if(quantize){
+		if(scale.notNil){
+			sequence = ~quantize.(newSequence, scale)
+		}{
+			// if we don't have a valid scale object we don't modify the sequence
+			// instead we throw an error
+			"scale is nil, pass valid scale object as argument\narguments: sequence, quantize, scale".error;
+		}
+	}{
+		// since we don't want to quantize we don't have to check for a valid scale
+		sequence =  newSequence
+	};
+	sequence;
 };
 
 // reverse the sequence
@@ -205,7 +248,22 @@
 		}
 	};
 	newSequence[1] = ~fadeFlat.(sequenceA[1], sequenceB[1], amount, 1);
-	if(quantize){ ~quantize.(newSequence, scale) }{ newSequence };
+
+	if(quantize){
+		if(scale.notNil){
+			~quantize.(newSequence, scale)
+		}{
+			// if we don't have a valid scale object we don't modify the sequence
+			// instead we throw an error and return the first sequence as the result
+			// so we (hopefully) don't disrupt playback
+			"scale is nil, pass valid scale object as argument\narguments: seqA, seqB, amount, quantize, scale".error;
+			sA
+		}
+
+	}{
+		newSequence
+	};
+
 };
 
 // increase consonance between sequences
@@ -236,7 +294,20 @@
 		newNote;
 	};
 	newSequence[1] = sequenceA[1];
-	if(quantize){ ~quantize.(newSequence, scale) }{ newSequence };
+	if(quantize){
+		if(scale.notNil){
+			~quantize.(newSequence, scale)
+		}{
+			// if we don't have a valid scale object we don't modify the sequence
+			// instead we throw an error and return the first sequence as the result
+			// so we (hopefully) don't disrupt playback
+			"scale is nil, pass valid scale object as argument\narguments: seqA, seqB, amount, quantize, scale".error;
+			sA
+		}
+
+	}{
+		newSequence
+	};
 };
 
 // take the first few notes of sequenceA and construct a new sequence where sequenceA is
@@ -254,7 +325,20 @@
 			newSequence[1] = newSequence[1].add(sequenceB[1][i]);
 		};
 	};
-	if(quantize){ ~quantize.(newSequence, scale) }{ newSequence };
+	if(quantize){
+		if(scale.notNil){
+			~quantize.(newSequence, scale)
+		}{
+			// if we don't have a valid scale object we don't modify the sequence
+			// instead we throw an error and return the first sequence as the result
+			// so we (hopefully) don't disrupt playback
+			"scale is nil, pass valid scale object as argument\narguments: seqA, seqB, amount, quantize, scale".error;
+			sequenceA
+		}
+
+	}{
+		newSequence
+	};
 };
 
 ~addRythm = {|seq, amount=1|
