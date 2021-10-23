@@ -64,7 +64,7 @@
 ~shorten = {|sequence, amount=0.1|
 	var length;
 	amount = amount.clip(0.001, 1);
-	length = (sequence[0].size / (1/amount)).ceil.postln;
+	length = (sequence[0].size / (1/amount)).ceil;
 	length.do{
 		if(sequence[0].size > 1){
 			sequence.do{|item, i| item.removeAt(sequence[i].size - 1); }
